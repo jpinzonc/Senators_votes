@@ -12,7 +12,6 @@ import pandas as pd
 
 page = requests.get('https://www.senate.gov/legislative/LIS/roll_call_votes/vote1151/vote_115_1_00165.xml')
 tree = html.fromstring(page.content)
-tree.type()
 name =pd.DataFrame(tree.xpath('//member_full/text()'))
 vote = pd.DataFrame(tree.xpath('//vote_cast/text()'))
 V_165 = name.join(vote, lsuffix='_Name', rsuffix='_165')
