@@ -16,7 +16,7 @@ import os
 from time import time
 
 #Change your path to working directory
-os.chdir("/Users/jpinzon/Google Drive/01_GitHub/senators_vote")
+#os.chdir("/Users/jpinzon/Google Drive/01_GitHub/senators_vote")
 
 ###################
 # GETING DATA FROM ANY CONGRESS AND SESSION  - JULY 2017
