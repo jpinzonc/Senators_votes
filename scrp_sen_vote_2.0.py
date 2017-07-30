@@ -280,7 +280,7 @@ def vote_selection (vote):
 
 
 
-cong_sess = get_cong_and_sess(114, 1, 'none') # year input default to 'none' in order to get the session and congress
+cong_sess = get_cong_and_sess(114, 2, 'none') # year input default to 'none' in order to get the session and congress
 cong = cong_sess[0]
 sess = cong_sess[1]
 vote = 'all'#'all'# 'all' is the default, but the idea is for the user to select a vote from the list
@@ -321,8 +321,6 @@ def save_votes_xml_1 (site_list): #DOWNLOAD AND SAVE FROM A LIST OF SITES
             #with urllib.request.urlopen(site) as in_stream, open(file, 'wb') as out_file:
             #copyfileobj(in_stream, out_file)
 
-
-
 def save_votes_xml2 (site_list): #DOWNLOAD AND SAVE FROM A LIST OF SITES
     # Each element in the list should be: 
     # "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1151/vote_115_1_00172.xml"
@@ -341,14 +339,9 @@ def save_votes_xml2 (site_list): #DOWNLOAD AND SAVE FROM A LIST OF SITES
             with open(file,'wb') as f:
                 f.write(r.content)
 
-#save_votes_xml_1(site_list(101,1)) # All you need to do is change the congress number (e.g. 101 - 115) and Session (1 OR 2)
+# To update enter las session number and session. 
+save_votes_xml2(site_list(115,1))
 
-for i in range(101,115):
-    save_votes_xml2(site_list(i,2))# All you need to do is change the congress number (e.g. 101 - 115) and Session (1 OR 2)
-save_votes_xml2(115,2)
-
-
-os.listdir()
 ############################################################################
 
 #GET A LIST OF URL FROM THE SESSION
