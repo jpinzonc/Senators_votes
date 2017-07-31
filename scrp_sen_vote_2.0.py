@@ -17,7 +17,7 @@ from bs4 import BeautifulSoup
 from xml.etree.ElementTree import parse
 
 #Change your path to working directory
-os.chdir("/Users/jpinzon/Google Drive/01_GitHub/senators_vote/Congress_data")
+os.chdir("/Users/jpinzon/Google Drive/01_GitHub/senators_vote/")
 
 ###################
 # GETING DATA FROM ANY CONGRESS AND SESSION  - JULY 2017
@@ -44,10 +44,12 @@ def site_list(congress_no, session_no): #  Enter congress and session number
         urls_list.append(b)
     return urls_list 
 
-def single_vote (siteorfile, worf): #######FUNCTIONAL#####
+def single_vote (siteorfile, worf, path): #######FUNCTIONAL#####
     # RETURNS A df FOR THE VOTE SESSION. 
     # FOUR COLUMNS MEMBER, FIRS, LAST AND VOTE 
     # worf = w or f, w = url and f file
+    curr_dir = (os.getcwd())
+    os.chdir(path)
     worf = str(worf)
     if worf == 'f':
         col  = "v_"+siteorfile[-18:-13]+"_"+siteorfile[-7:-4]
@@ -76,6 +78,7 @@ def single_vote (siteorfile, worf): #######FUNCTIONAL#####
     svotes = svotes.join(state)
     svotes = svotes.join(party)
     svotes = svotes.join(Sen_vote)
+    os.chdir(curr_dir)
     return svotes
 
 def single_vote_alt(site): # SOME URL DO NOT DOWNLOAD - ONLY WORKS FOR URLs
@@ -97,17 +100,17 @@ def single_vote_alt(site): # SOME URL DO NOT DOWNLOAD - ONLY WORKS FOR URLs
     comb = svotes.join(sen_vote)
     return comb
 
-def senat_votes(url_list, worf): # Get all votes data for each senator
+def senat_votes(url_list, worf, path): # Get all votes data for each senator
     s_votes = pd.DataFrame()
     worf = str(worf)
     if s_votes.empty:
-        s_votes = single_vote(url_list[0], worf)
+        s_votes = single_vote(url_list[0], worf, path)
         new_index=list(s_votes.iloc[:,0:5])
         s_votes = s_votes.set_index(new_index)
         print("Vote:",url_list[0][-18:-13]+"_"+url_list[0][-7:-4], " - Added:", s_votes.empty !=True, s_votes.shape)
     if s_votes.empty != True:
         for i in range(1, len(url_list)):
-            df = single_vote(url_list[i], worf)
+            df = single_vote(url_list[i], worf, path)
             new_index=list(df.iloc[:,0:5])
             df = df.set_index(new_index)
             if df.empty: # Votes 33 and 91 were not downloading. Using single_vote_alt for these works
@@ -170,11 +173,13 @@ def vote_count_all(df_votes): # Detemines total number of votes for each categor
 ##################
 ######## GENERATE LIST OF VOTES FOR CONGRESS SESSION
 ###################
-def vote_sum (siteorfile, worf): #######FUNCTIONAL#####
+def vote_sum (siteorfile, worf, path): #######FUNCTIONAL#####
     # RETURNS A df FOR THE VOTE SESSION. 
     # FOUR COLUMNS MEMBER, FIRS, LAST AND VOTE 
     # worf = w or f, w = url and f file
     worf = str(worf)
+    current = os.getcwd()
+    os.chdir(path)
     if worf == 'f':
         #col  = "v_"+siteorfile[-18:-13]+"_"+siteorfile[-7:-4]
         tree = parse(siteorfile)
@@ -196,20 +201,21 @@ def vote_sum (siteorfile, worf): #######FUNCTIONAL#####
     Vote_no = Vote_no.join(Yeas)
     Vote_no = Vote_no.join(Nays)
     Vote_no = Vote_no.join(Question)
+    os.chdir(current)
     return Vote_no
 
-def vote_list(url_list, worf): # Returns a list of votes with results and title
+def vote_list(url_list, worf, path): # Returns a list of votes with results and title
     # only works on files for now. Use save_votes_xml to get the files in the local machine
     l_votes = pd.DataFrame()
     worf = str(worf)
     if l_votes.empty:
-        l_votes = vote_sum(url_list[0], worf)
+        l_votes = vote_sum(url_list[0], worf, path)
         #new_index=list(s_votes.iloc[:,0:5])
         #s_votes = s_votes.set_index(new_index)
         print("Vote:",url_list[0][-18:-13]+"_"+url_list[0][-7:-4], " - Added:", l_votes.empty !=True, l_votes.shape)
     if l_votes.empty != True:
         for i in range(1, len(url_list)):
-            df = vote_sum(url_list[i], worf)
+            df = vote_sum(url_list[i], worf, path)
             #new_index=list(df.iloc[:,0:5])
             #df = df.set_index(new_index)
             if df.empty: # Votes 33 and 91 were not downloading. Using single_vote_alt for these works
@@ -278,28 +284,32 @@ def vote_selection (vote):
         fiLE='c*'+str(cong)+'_'+str(sess)+'_*'+str(vote)+'.xml'
     return str(fiLE)
 
+#####################
+##### RUNNING THE SCRIPT
+################### OPEN THE FILE
+# Variables needed:
+Congress = 101
+Session  = 2
+year     = 'none'
+vote     = 10 #'all' # 'all' is the default, but the idea is for the user to select a vote from the list
 
 
-cong_sess = get_cong_and_sess(114, 2, 'none') # year input default to 'none' in order to get the session and congress
+t1=time()
+cong_sess = get_cong_and_sess(Congress, Session, year) # year input default to 'none' in order to get the session and congress
 cong = cong_sess[0]
 sess = cong_sess[1]
-vote = 'all'#'all'# 'all' is the default, but the idea is for the user to select a vote from the list
-
-
-
+path = 'data/'+str(cong)+'/'
 fiLes=vote_selection(vote)
-t1=time()
-vote_counts    = vote_count_all(senat_votes(fnmatch.filter(os.listdir(), fiLes), 'f'))
+vote_counts    = vote_count_all(senat_votes(fnmatch.filter(os.listdir(path), fiLes), 'f', path))
 senators_votes = vote_counts['Senator_total']
 party_votes    = vote_counts['Party_total']
 t2=time()
 prim = t2-t1
 ta=time()
-list_votes     = vote_list(fnmatch.filter(os.listdir(), fiLes), 'f')
+list_votes     = vote_list(fnmatch.filter(os.listdir(path), fiLes), 'f', path)
 tb=time()
 seg = tb-ta
 print(prim, seg)
-
 
 #####################
 # SAVING XMLs FROM ALL VOTES
@@ -340,6 +350,7 @@ def save_votes_xml2 (site_list): #DOWNLOAD AND SAVE FROM A LIST OF SITES
                 f.write(r.content)
 
 # To update enter las session number and session. 
+
 save_votes_xml2(site_list(115,1))
 
 ############################################################################
@@ -378,6 +389,3 @@ save_votes_xml2(site_list(115,1))
 ### leflet  
 ### angular2
 ### polymer - 
-
-
-
