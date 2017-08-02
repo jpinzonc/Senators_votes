@@ -288,10 +288,10 @@ def vote_selection (vote):
 ##### RUNNING THE SCRIPT
 ################### OPEN THE FILE
 # Variables needed:
-Congress = 101
-Session  = 2
+Congress = 115
+Session  = 1
 year     = 'none'
-vote     = 10 #'all' # 'all' is the default, but the idea is for the user to select a vote from the list
+vote     = 'all' # 'all' is the default, but the idea is for the user to select a vote from the list
 
 
 t1=time()
@@ -363,7 +363,6 @@ save_votes_xml2(site_list(115,1))
 
 # Save file into the working directory. Change the path appropierly
 #sen_votes_sum.to_csv("senators_votes_115.csv", index = False)
-#senators_votes.to_csv("senators_votes_114.csv", index = False)
 #party_votes.to_csv("parties_vote_114.csv", index = False)
 #list_votes.to_csv("list_of_votes_114.csv", index = False)
 
