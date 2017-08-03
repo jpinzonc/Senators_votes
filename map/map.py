@@ -35,18 +35,33 @@ for row in range(0,len(latlon)):
     lat=latlon['lat'][row]
     df = state_data.loc[state_data['State'] == state]
     for row in df.index:
-         # create popup on click
+         # create popup on click with a table
          html="""
          <h1>{}</h1><br>
-         Name: {}  {}  ({})<br>
-         Yeas: {} <br>
-         Nays: {} <br>
-         No-vote: {}<br>
-         TOTAL: {}
+         <table style="width:100%">
+         <tr, td aling="center">
+         <th>First</th>
+         <th>Last</th> 
+         <th>Party</th>
+         <th>Yeas</th>
+         <th>Nay</th>
+         <th>No vote</th>
+         <th>Total</th>
+         </tr>
+         <tr>
+         <td align="center">{}</td>
+         <td align="center">{}</td> 
+         <td align="center">{}</td>
+         <td align="center">{}</td>
+         <td align="center">{}</td>
+         <td align="center">{}</td>
+         <td align="center">{}</td>
+         </tr>
+         </table>
          """
          html = html.format(state_name,df['First'][row],df['Last'][row],df['Party'][row],df['Yea'][row],
                             df['Nay'][row], df['Not Voting'][row],df['Total'][row])
-         iframe = IFrame(html=html, width=250, height=200)
+         iframe = IFrame(html=html, width=400, height=200)
          popup = folium.Popup(iframe, max_width=2650)
          folium.Marker((lat,lon),
                        popup=popup,
