@@ -1,4 +1,4 @@
-from flask import Flask, render_template, g, request
+from flask import Flask, render_template, g, request, url_for
 import pandas as pd
 from pandas import read_sql_query as rsq
 import sqlite3
@@ -61,12 +61,11 @@ def db_votes(year): # Runs the vote_count_all function on the appropriate df aft
     dbvot = vote_count_all(rsq(que,conn))
     return dbvot
 
-	
 def map_create(df_sen):
     latlon= pd.read_csv('files/us_lat_lon.csv')
     width, height = 1000, 500
     # CREATE MAP:
-    sen_map = folium.Map(location=[40, -110], zoom_start=3,
+    sen_map = folium.Map(location=[40, -180], zoom_start=3,
                          tiles='OpenStreetMap', width=width, height=height)
     # CLUSTER POINTS
     marker_cluster = folium.MarkerCluster().add_to(sen_map)
@@ -120,9 +119,12 @@ def map_create(df_sen):
 
 app = Flask(__name__)
 
-@app.route('/', methods = ['POST'])
+@app.route('/', methods = ['POST', 'GET'])
 def index():
-	year = request.form['year']
+	if request.method == 'POST':
+		year = request.form['year']
+	else:
+		year =2017
 	v_o_t_e = db_votes(year)
 	Sen_db=v_o_t_e[1]
 	sen_map=Sen_db.drop(['Year','Congress','Session'], axis=1)
