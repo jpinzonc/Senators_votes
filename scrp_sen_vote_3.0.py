@@ -154,7 +154,7 @@ def vote_count_all(df_votes): # Detemines total number of votes for each categor
     # Counting votes per senator
     for vote in range(0,len(unique_votes)):
         df1[unique_votes[vote]] = df[df==unique_votes[vote]].count(axis=1)
-    df1_total=pd.DataFrame(df1.sum(1), columns=['Total'])
+    df1_total=pd.DataFrame(df1.filter(items=['Yea', 'Nay']).sum(1), columns=['Total'])
     # Calculate percent of vote for each senator
     df1 = df1[unique_votes]
     df_sen = round(df1.div(df1.sum(1)/100,0),2)
@@ -174,7 +174,7 @@ def vote_count_all(df_votes): # Detemines total number of votes for each categor
         df4[unique_votes[vote]] = df3[df3==unique_votes[vote]].count(axis=1)
     df4 = df4[unique_votes]
     df4 = df4.groupby(df4.index)[unique_votes].sum()
-    df4_total=pd.DataFrame(df4.sum(1), columns=['Total'])
+    df4_total=pd.DataFrame(df4.filter(items=['Yea', 'Nay']).sum(1), columns=['Total'])
     # Calculate percent of vote for each part
     df_par = round(df4.div(df4.sum(1)/100,0),2)
     df_par = df_par.merge(df4_total, right_index=True, left_index=True)
@@ -548,7 +548,7 @@ def db_votes(year):
     return dbvot
 
 
-year=2004
+year=2017
    
 for year in range(1989,2018):
     year=year
@@ -558,10 +558,15 @@ for year in range(1989,2018):
     Par_db=v_o_t_e[0]
     t5 = time()
     print(year,t5-t4)
+    
+AL=("AL", "ARN")
+db_votes(2017)[1][db_votes(2017)[1].State.isin(AL)]
+
 
 fd1 = rsq('''SELECT Member, 
           First, Last, State, Party, v_106_2_001 
           FROM vote_2000_106_2''', conn)
+
 vote_count_all(fd1)[0]
 vote_count_all(fd1)[1]
 
@@ -575,11 +580,21 @@ sql = sql.format(colum, tablename)
 
 te=rsq(sql, conn)
 
-year=1989
+year=2017
 
 
 
 rsq("Select distinct(Party) from vote_2007_110_1", conn)
 
 rsq("SELECT * FROM congres_tb", conn)
+
+df_votes=rsq('''SELECT * 
+          FROM vote_2017_115_1 WHERE State=="AL"''', conn)
+
+
+
+
+
+
+
 
