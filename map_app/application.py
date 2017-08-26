@@ -1,10 +1,12 @@
+import os
 from   flask  import Flask, render_template, g, request, url_for
 import pandas as pd
 from   pandas import read_sql_query as rsq
 import sqlite3
 import folium
 from   folium import IFrame
-import os # Needed in cloud9
+from IPython.display import HTML, Javascript
+
 
 def connect_db():
 	return sqlite3.connect(app.config['DATABASE'])
@@ -62,9 +64,16 @@ def db_votes(year): # Runs the vote_count_all function on the appropriate df aft
     dbvot = vote_count_all(rsq(que,g.db))
     return dbvot
 
+def vote_list_fun(year):
+    table_name = str("vl_"+str(year)+"_"+str(get_cong_ses_db(year)[0])+"_"+str(get_cong_ses_db(year)[1])+"_vl")
+    ls_query=("SELECT * FROM "+table_name+" ;")
+    list_votes = rsq(ls_query,g.db)
+    list_votes = list_votes[['Vote_Number', 'Question', 'Yeas' ,'Nays']]
+    return list_votes
+
 def map_create(df_sen, latlon):
     #latlon= pd.read_csv('files/us_lat_lon.csv')
-    width, height = 1250, 450
+    width, height = 550, 500
     # CREATE MAP:
     sen_map = folium.Map(location=[40, -115], zoom_start=3, tiles='Stamen Terrain',
                          width=width, height=height)
@@ -93,7 +102,7 @@ def map_create(df_sen, latlon):
             <th>First</th>
             <th>Last</th> 
             <th>Party</th>
-            <th>Yeas</th>
+            <th>Yea</th>
             <th>Nay</th>
             <th>No vote</th>
             <th>Total</th>
@@ -120,7 +129,6 @@ def map_create(df_sen, latlon):
 
 #Config
 DATABASE = 'files/sen_vote.db'
-DEBUG = True
 app = Flask(__name__)
 
 @app.before_request
@@ -145,11 +153,22 @@ def index():
 	sen_map = Sen_db.drop(['Year','Congress','Session'], axis=1)
 	sen_map = map_create(sen_map, latlon)
 	sen_map.save('templates/map.html')
-	return render_template('index.html', year = year)
+	
+	party_total = v_o_t_e[0][['Party','Yea','Nay','Not Voting','Total']]
+	party_total['Party'] = party_total['Party'].replace("D", "Democrat")
+	party_total['Party'] = party_total['Party'].replace("R", "Republican")
+	party_total['Party'] = party_total['Party'].replace("I", "Independent")
+	
+	sq = """SELECT * FROM congres_tb WHERE year = {0};"""
+	sql2 = sq.format(year)
+	senate_info = rsq(sql2,g.db)
+	
+	vote_list=vote_list_fun(year)
+	pd.set_option('display.max_colwidth', -1)
 
+	return render_template('index.html', year = year, party_total=party_total, senate_info=senate_info, vote_list=vote_list)
 
 app.config.from_object(__name__)
 if __name__ == '__main__':
-   # app.debug = True
-    app.run()
-
+    app.debug = True
+    #app.run(host=os.getenv('IP', '0.0.0.0'), port=int(os.getenv('PORT', 8080))) # REQUIRE TO WORK ON CLOUD9

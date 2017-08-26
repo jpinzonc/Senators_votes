@@ -321,7 +321,7 @@ cong_sess = get_cong_and_sess(Congress, Session, year) # year input default to '
 cong = cong_sess[0]
 sess = cong_sess[1]
 path = 'data/'+str(cong)+'/'
-fiLes=vote_selection(vote)
+fiLes= vote_selection(vote)
 vote_counts    = vote_count_all(senat_votes(fnmatch.filter(os.listdir(path), fiLes), 'f', path))
 senators_votes = vote_counts['Senator_total']
 party_votes    = vote_counts['Party_total']
@@ -532,10 +532,6 @@ for i in range(1,len(v)):
     print (pd.read_sql_query(strin, conn).head())
 
 #####################
-
-
-rsq("SELECT * FROM congres_tb WHERE year =1989", conn)
-
 def get_cong_ses_db(year):
     cong = int(rsq(("SELECT * FROM congres_tb WHERE year ="+str(year)+""), conn)['congress'])
     sess = int(rsq(("SELECT * FROM congres_tb WHERE year ="+str(year)+""), conn)['session'])
@@ -547,51 +543,12 @@ def db_votes(year):
     dbvot = vote_count_all(rsq(que,conn))
     return dbvot
 
-
-year=2017
-   
-for year in range(1989,2018):
-    year=year
-    t4=time()
-    v_o_t_e = db_votes(year)
-    Sen_db=v_o_t_e[1]
-    Par_db=v_o_t_e[0]
-    t5 = time()
-    print(year,t5-t4)
-    
-AL=("AL", "ARN")
-db_votes(2017)[1][db_votes(2017)[1].State.isin(AL)]
-
-
-fd1 = rsq('''SELECT Member, 
-          First, Last, State, Party, v_106_2_001 
-          FROM vote_2000_106_2''', conn)
-
-vote_count_all(fd1)[0]
-vote_count_all(fd1)[1]
-
-colum="v_106_2_001"
-tablename="vote_2000_106_2"
-
-sql = """select Year, Congress, Session, Member,
-         First, Last, State, Party,{0}
-         from {1};"""
-sql = sql.format(colum, tablename)
-
-te=rsq(sql, conn)
-
-year=2017
-
-
-
-rsq("Select distinct(Party) from vote_2007_110_1", conn)
-
-rsq("SELECT * FROM congres_tb", conn)
-
-df_votes=rsq('''SELECT * 
-          FROM vote_2017_115_1 WHERE State=="AL"''', conn)
-
-
+def vote_list(year):
+    table_name = str("vl_"+str(year)+"_"+str(get_cong_ses_db(year)[0])+"_"+str(get_cong_ses_db(year)[1])+"_vl")
+    ls_query=("SELECT * FROM "+table_name+" ;")
+    list_votes = rsq(ls_query,conn)
+    list_votes[['Vote_Numer]]
+    return list_votes
 
 
 
