@@ -3,14 +3,14 @@
 {% block title %} U.S. SENATORS VOTE {% endblock %}
 
 {% block head %} 
-
+<meta name="viewport" content="width=1250, initial-scale=0.30">
 {{ super() }} 
 
 {% endblock %}
 
 {% block body %}
     <div>
-        <div style='margin-left:450px; margin-right:450px;'>
+        <div id="senate_info" style='margin-left:450px; margin-right:450px;'>
             {{senate_info.to_html(classes="table table-striped",index = False).
                 replace('<table border="1"', '<table border="1" column-width="50px"').
                 replace('<tr style="text-align: right;">','<tr>').
@@ -19,12 +19,11 @@
         </div>
     </div>
     
-    <div id=Individuals align="center" style="border:1px solid blue">
+    <div id="individual_votes" align="center" style="border:1px solid blue">
         INIDIVIDUAL VOTES
     </div>
     
-    <div margin=20px 
-        style="overflow: auto;
+    <div id = "map_table wrapper" style="overflow: auto;
         margin-top:   10px;
         margin-left:  50px; 
         margin-right: 50px;
@@ -34,8 +33,8 @@
             <div>{% include "map.html" %} </div>
         </map>
 
-        <div style='float:right;
-                    width: 550px;
+        <div id = "list_table" style='float:right;
+                    width:  550px;
                     height: 500px;
                     overflow-y: scroll;
                     overflow-x:hidden;'>
@@ -47,7 +46,7 @@
         </div>
     </div>
 
-    <div id=parties align='center' style="border:1px solid blue">
+    <div id= "parties_total" align='center' style="border:1px solid blue">
         PARTY TOTALS
     </div>
     <div style='margin-top: 10px; 

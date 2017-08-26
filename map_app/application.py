@@ -5,7 +5,7 @@ from   pandas import read_sql_query as rsq
 import sqlite3
 import folium
 from   folium import IFrame
-from IPython.display import HTML, Javascript
+from   IPython.display import HTML, Javascript
 
 
 def connect_db():
@@ -171,4 +171,4 @@ def index():
 app.config.from_object(__name__)
 if __name__ == '__main__':
     app.debug = True
-    #app.run(host=os.getenv('IP', '0.0.0.0'), port=int(os.getenv('PORT', 8080))) # REQUIRE TO WORK ON CLOUD9
+    app.run()#    app.run(host=os.getenv('IP', '0.0.0.0'), port=int(os.getenv('PORT', 8080)))
