@@ -1,0 +1,61 @@
+{% extends "layout.html" %}
+
+{% block title %} U.S. SENATORS VOTE {% endblock %}
+
+{% block head %} 
+<meta name="viewport" content="width=1250, initial-scale=0.30">
+{{ super() }} 
+
+{% endblock %}
+
+{% block body %}
+    <div>
+        <div id="senate_info" style='margin-left:450px; margin-right:450px;'>
+            {{senate_info.to_html(classes="table table-striped",index = False).
+                replace('<table border="1"', '<table border="1" column-width="50px"').
+                replace('<tr style="text-align: right;">','<tr>').
+                replace('<th>','<th style="text-transform: uppercase; text-align: center; background-color: #3690c0" >').
+                replace('<td>','</td><td align="center">') | safe}}
+        </div>
+    </div>
+    
+    <div id="individual_votes" align="center" style="border:1px solid blue">
+        INIDIVIDUAL VOTES
+    </div>
+    
+    <div id = "map_table wrapper" style="overflow: auto;
+        margin-top:   10px;
+        margin-left:  50px; 
+        margin-right: 50px;
+        margin-bottom:10px;">
+
+        <map style="float:left; width=750">
+            <div>{% include "map.html" %} </div>
+        </map>
+
+        <div id = "list_table" style='float:right;
+                    width:  550px;
+                    height: 500px;
+                    overflow-y: scroll;
+                    overflow-x:hidden;'>
+            {{vote_list.to_html(classes="table table-striped",index = False).
+            replace('<tr style="text-align: right;">','<tr>').
+            replace('<th>','<th style="text-transform: uppercase; text-align: center; background-color: #3690c0" >').
+            replace('<td>','</td><td align="center">') 
+               |safe}}
+        </div>
+    </div>
+
+    <div id= "parties_total" align='center' style="border:1px solid blue">
+        PARTY TOTALS
+    </div>
+    <div style='margin-top: 10px; 
+        margin-left: 50px; 
+        margin-right:50px;'>
+        {{party_total.to_html(classes="table table-striped",index = False).
+            replace('<tr style="text-align: right;">','<tr>').
+            replace('<th>','<th style="text-transform: uppercase; text-align: center; background-color: #3690c0" >').
+            replace('<td>','</td><td align="center">') | safe}}
+    </div>
+
+{% endblock %}

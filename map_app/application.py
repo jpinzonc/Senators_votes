@@ -20,7 +20,7 @@ def vote_count_all(df_votes): # Detemines total number of votes for each categor
     df1 = df_votes.set_index(l_index)
     df  = df_votes.set_index(l_index)
     # Counting votes per senator
-    for vote in range(0,len(unique_votes)):
+    for vote in range(len(unique_votes)):
         df1[unique_votes[vote]] = df[df==unique_votes[vote]].count(axis=1)
     df1_total=pd.DataFrame(df1.filter(items=['Yea', 'Nay']).sum(1), columns=['Total'])
     # Calculate percent of vote for each senator
@@ -38,7 +38,7 @@ def vote_count_all(df_votes): # Detemines total number of votes for each categor
     df4  = df3.set_index(l_index_par)
     df3  = df3.set_index(l_index_par)
     # Counting votes per party
-    for vote in range(0,len(unique_votes)):
+    for vote in range(len(unique_votes)):
         df4[unique_votes[vote]] = df3[df3==unique_votes[vote]].count(axis=1)
     df4 = df4[unique_votes]
     df4 = df4.groupby(df4.index)[unique_votes].sum()
@@ -80,7 +80,7 @@ def map_create(df_sen, latlon):
     # CLUSTER POINTS
     marker_cluster = folium.MarkerCluster().add_to(sen_map)
     #inline_map(radars)
-    for row in range(0,len(latlon)):
+    for row in range(len(latlon)):
         state_name = latlon['state_name'][row]
         state      = latlon['state'][row]
         lon        = latlon['lon'][row]
@@ -166,9 +166,15 @@ def index():
 	vote_list=vote_list_fun(year)
 	pd.set_option('display.max_colwidth', -1)
 
-	return render_template('index.html', year = year, party_total=party_total, senate_info=senate_info, vote_list=vote_list)
+	year_list=rsq("SELECT year FROM congres_tb ORDER BY year DESC", g.db)['year'].tolist()
+	year_list.insert(0, year)
 
+	return render_template('index.html', year = year, party_total=party_total, senate_info=senate_info, vote_list=vote_list,
+		year_list=year_list)
+		
 app.config.from_object(__name__)
 if __name__ == '__main__':
     app.debug = True
-    app.run()#    app.run(host=os.getenv('IP', '0.0.0.0'), port=int(os.getenv('PORT', 8080)))
+    app.run()
+    #app.run(host='0.0.0.0') # FOR AMAZON
+    #app.run(host=os.getenv('IP', '0.0.0.0'), port=int(os.getenv('PORT', 8080))) # For Cloud9

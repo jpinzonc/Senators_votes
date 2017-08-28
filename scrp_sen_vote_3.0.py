@@ -550,8 +550,28 @@ def vote_list(year):
     list_votes[['Vote_Numer]]
     return list_votes
 
+def senator_voting(year, member):
+    tablename = str("vote_"+str(year)+"_"+str(get_cong_ses_db(year)[0])+"_"+str(get_cong_ses_db(year)[1]))
+    sen_q=("SELECT * FROM "+tablename+" WHERE Member ='"+member+"' ;")
+    df_sen = rsq(sen_q,conn)
+    df_sen=df_sen.transpose()[8:]
+    df_sen.columns=[str(member)]
+    return df_sen
+
+
+def senator_name(year):
+    tablename = str("vote_"+str(year)+"_"+str(get_cong_ses_db(year)[0])+"_"+str(get_cong_ses_db(year)[1]))
+    sen_name=("SELECT Last FROM "+tablename+" Limit 1;")
+    df_sen_name = rsq(sen_name,conn)
+    return df_sen_name
+
+type(senator_name(2016)[1])
+
+senator_name(2016).Last[0]
+
+
+rsq("Select Last from vote_2006_109_2 Limit 1", conn)
 
 
 
-
-
+senator_voting(2017, 'Alexander (R-TN)')
