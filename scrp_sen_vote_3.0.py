@@ -479,7 +479,7 @@ def do_file(filename, db, str_name ):
         with db:
             data = csv.DictReader(f)
             cols = data.fieldnames
-            table=str_name+os.path.splitext(os.path.basename(filename))[0]
+            table= str_name+os.path.splitext(os.path.basename(filename))[0]
             # if the table exist this will delete it. 
             sql = 'drop table if exists "{}"'.format(table)
             db.execute(sql)
