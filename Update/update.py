@@ -42,26 +42,7 @@ congress_db = int(lastVote[0][-9:-6])
 print("Current db congress %d, current session %d, and current vote %d" % 
       (congress_db, session_db, vote_db))
 
-# Determine current status:
-if congress_ol != congress_db:
-    print ("The congress in the database is NOT the latest")
-    print ("Need to update all the congress")
-    
-elif session_ol != session_db:
-    print ("Congress up-to-date, but session is NOT")
-    print("Update session")
-    
-elif vote_ol != vote_db:
-    print ("Congress and session are up-to-date, but vote is NOT")
-    print("Update vote")
 
-else:
-    print("The database is up-to-date")
-
-d = {'Index':['Congress','Session','Vote'],'Current':[congress_ol, session_ol, vote_ol], 'Database':[congress_db, session_db, vote_db]}
-comparison_df = pd.DataFrame(data=d).set_index('Index')
-
-print(comparison_df)
 
 
 
@@ -105,5 +86,25 @@ def save_votes_xml2 (site_list): #DOWNLOAD AND SAVE FROM A LIST OF SITES
             with open(file,'wb') as f:
                 f.write(r.content)
                 
-                
-save_votes_xml2(site_list(congress_ol,session_ol))
+ 
+
+# Determine current status and update:
+if congress_ol != congress_db:
+    print ("The congress in the database is NOT the latest")
+    save_votes_xml2(site_list(congress_ol,session_ol))
+    
+elif session_ol != session_db:
+    print ("Congress up-to-date, but session is NOT")
+    save_votes_xml2(site_list(congress_ol,session_ol))    
+
+elif vote_ol != vote_db:
+    print ("Congress and session are up-to-date, but vote is NOT")
+    save_votes_xml2(site_list(congress_ol,session_ol))
+
+else:
+    print("The database is up-to-date")
+
+d = {'Index':['Congress','Session','Vote'],'Current':[congress_ol, session_ol, vote_ol], 'Database':[congress_db, session_db, vote_db]}
+comparison_df = pd.DataFrame(data=d).set_index('Index')
+
+print(comparison_df)               
