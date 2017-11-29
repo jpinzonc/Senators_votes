@@ -15,6 +15,8 @@ import urllib.request
 from lxml import html
 from pandas import read_sql_query as rsq
 from xml.etree.ElementTree import parse
+from operator import itemgetter
+
 
 
 # Getting the last vote on the system online
@@ -23,8 +25,9 @@ response = urllib.request.urlopen(url).read()
 congress_ol = int(max(re.findall('congress=([0-9]{3})+', str(response))))
 session_ol  =int(max(re.findall('session=([0-9]{1})+', str(response))))
 vote_ol     = int(max(re.findall('vote=([0-9]{5})+', str(response))))
-print("Current online congress %d, current session %d, and current vote %d" 
-      % (congress_ol, session_ol, vote_ol))
+
+#print("Current online congress %d, current session %d, and current vote %d" 
+#      % (congress_ol, session_ol, vote_ol))
 
 
 # Getting the last vote on data base
@@ -41,12 +44,13 @@ vote_db = int(lastVote[0][-3:])
 session_db = int(lastVote[0][-5])
 congress_db = int(lastVote[0][-9:-6])
 
-print("Current db congress %d, current session %d, and current vote %d" % 
-      (congress_db, session_db, vote_db))
+#print("Current db congress %d, current session %d, and current vote %d" % 
+#      (congress_db, session_db, vote_db))
 
+#rsq("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;",con)
 
-
-
+#rsq("SELECT * FROM vote_2017_115_1 LIMIT 10", con)
+#rsq("SELECT * FROM   vl_1992_102_2_vl      LIMIT 10", con)
 
 def site_list(congress_no, session_no): #  Enter congress and session number
     # Returns a list of urls for the designated congress and session. 
@@ -80,9 +84,9 @@ def save_votes_xml2 (site_list): #DOWNLOAD AND SAVE FROM A LIST OF SITES
         site = site_list[i]
         file  = "congress_"+site[-15:-9]+"vote_"+site[-7:-4]+".xml"
         if os.path.exists(file)==True:
-            print(file+" File Exists")
+            print(file + " File Exists")
         if (os.path.exists(file)!=True) or (len(files)==0):
-            print("Creating file: "+ file)
+            print("Creating file: " + file)
            
             r = requests.get(site,headers={'User-Agent': 'Mozilla'})
             with open(file,'wb') as f:
@@ -90,18 +94,29 @@ def save_votes_xml2 (site_list): #DOWNLOAD AND SAVE FROM A LIST OF SITES
                 
  
 
+def update_list(congress_ol,session_ol, vote_db, vote_ol):
+    # Retunrs a list with the URL to be updates for the congress and vote
+    # Uses site_list
+    list_votes = site_list(congress_ol,session_ol)
+    list_to_update = []
+    for i in range(vote_db+1, vote_ol+1):
+        list_to_update.append(itemgetter(i-1)(list_votes))
+    return list_to_update
+
 # Determine current status and update:
 if congress_ol != congress_db:
     print ("The congress in the database is NOT the latest")
-    save_votes_xml2(site_list(congress_ol,session_ol))
+    save_votes_xml2(update_list(congress_ol,session_ol, vote_db, vote_ol))
+
     
 elif session_ol != session_db:
     print ("Congress up-to-date, but session is NOT")
-    save_votes_xml2(site_list(congress_ol,session_ol))    
+    save_votes_xml2(update_list(congress_ol,session_ol, vote_db, vote_ol))    
 
 elif vote_ol != vote_db:
     print ("Congress and session are up-to-date, but vote is NOT")
-    save_votes_xml2(site_list(congress_ol,session_ol))
+    save_votes_xml2(update_list(congress_ol,session_ol, vote_db, vote_ol))
+
 
 else:
     print("The database is up-to-date")
@@ -110,7 +125,6 @@ d = {'Index':['Congress','Session','Vote'],'Current':[congress_ol, session_ol, v
 comparison_df = pd.DataFrame(data=d).set_index('Index')
 
 print(comparison_df)   
-
 
 def get_cong_and_sess(congress_input, session_input,year_input):
     # if year input different to 'none' the function returns the cong and session for the specified year.
@@ -197,7 +211,7 @@ def senat_votes(url_list, worf, path): # Get all votes data for each senator
     return s_votes
 
 
-senat_votes(['congress_115_1_vote_036.xml'], 'f', '.')
+#senat_votes(['congress_115_1_vote_036.xml'], 'f', '.')
 
 
 
@@ -223,6 +237,6 @@ def congress_year_list(*year): # empty year uses current year
     congress_df['session'] = np.where(congress_df.year % 2, 1, 2)
     return congress_df
 
-congres_tb = congress_year_list()
+#congres_tb = congress_year_list()
 
-get_cong_and_sess(115,1,'none')
+#get_cong_and_sess(115,1,'none')
