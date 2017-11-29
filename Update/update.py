@@ -10,9 +10,11 @@ import os, re
 import sqlite3
 import requests
 import pandas as pd
+import numpy as np
 import urllib.request
 from lxml import html
 from pandas import read_sql_query as rsq
+from xml.etree.ElementTree import parse
 
 
 # Getting the last vote on the system online
@@ -107,4 +109,120 @@ else:
 d = {'Index':['Congress','Session','Vote'],'Current':[congress_ol, session_ol, vote_ol], 'Database':[congress_db, session_db, vote_db]}
 comparison_df = pd.DataFrame(data=d).set_index('Index')
 
-print(comparison_df)               
+print(comparison_df)   
+
+
+def get_cong_and_sess(congress_input, session_input,year_input):
+    # if year input different to 'none' the function returns the cong and session for the specified year.
+    # year default should be 'none' to get cong and sess from congress and session input
+    if year_input != 'none':
+        congress_input=[]
+        session_input =[]
+        ind=congres_tb.loc[congres_tb[(congres_tb["year"] == year_input)].index].index.values[0]
+        congress_input  = congres_tb.loc[ind]['congress']
+        session_input   = congres_tb.loc[ind]['session']
+    # Generate df with percent and total
+    cong = int('{0:0>3}'.format(congress_input))
+    sess = session_input
+    return (cong, sess)
+
+            
+
+def single_vote (siteorfile, worf, path): #######FUNCTIONAL#####
+    # RETURNS A df FOR THE VOTE SESSION. 
+    # FOUR COLUMNS MEMBER, FIRS, LAST AND VOTE 
+    # worf = w or f, w = url and f file
+    curr_dir = (os.getcwd())
+    os.chdir(path)
+    worf = str(worf)
+    if worf == 'f':
+        col  = "v_"+siteorfile[-18:-13]+"_"+siteorfile[-7:-4]
+        tree = parse(siteorfile)
+        elem = tree.getroot() 
+        L_name      = pd.DataFrame([element.text for element in elem.findall('.//members//last_name')], columns = ["Last"])
+        Sen_members = pd.DataFrame([element.text for element in elem.findall('.//members//member_full')], columns = ["Member"])
+        F_name      = pd.DataFrame([element.text for element in elem.findall('.//members//first_name')], columns = ["First"])
+        party       = pd.DataFrame([element.text for element in elem.findall('.//members//party')], columns = ["Party"])
+        state       = pd.DataFrame([element.text for element in elem.findall('.//members//state')], columns = ["State"])
+        Sen_vote    = pd.DataFrame([element.text for element in elem.findall('.//members//vote_cast')], columns = [col])
+    if worf == 'w':
+        col  = "v_"+siteorfile[-15:-12]+"_"+siteorfile[-7:-4]
+        req  = urllib.request.Request(siteorfile, headers={'User-Agent': 'Mozilla'}) # !!!!! AGENT MAY NEED TO BE CHANGED WHEN DEPLOYED!!!!
+        page = urllib.request.urlopen(req)
+        soup = BeautifulSoup(page.read(), 'xml')
+        soup = list(soup.children)[0]
+        Sen_members = pd.DataFrame([element.text for element in soup.find_all("member_full")], columns = ["Member"])
+        F_name      = pd.DataFrame([element.text for element in soup.find_all("first_name")], columns = ["First"])
+        L_name      = pd.DataFrame([element.text for element in soup.find_all("last_name")], columns = ["Last"])
+        party       = pd.DataFrame([element.text for element in soup.find_all("party")], columns = ["Party"])
+        state       = pd.DataFrame([element.text for element in soup.find_all("state")], columns = ["State"])
+        Sen_vote    = pd.DataFrame([element.text for element in soup.find_all("vote_cast")], columns = [col])
+    svotes = Sen_members.join(F_name)
+    svotes = svotes.join(L_name)
+    svotes = svotes.join(state)
+    svotes = svotes.join(party)
+    svotes = svotes.join(Sen_vote)
+    os.chdir(curr_dir)
+    return svotes
+
+def senat_votes(url_list, worf, path): # Get all votes data for each senator
+    s_votes = pd.DataFrame()
+    worf = str(worf)
+    if s_votes.empty:
+        s_votes = single_vote(url_list[0], worf, path)
+        new_index=list(s_votes.iloc[:,0:5])
+        s_votes = s_votes.set_index(new_index)
+        print("Vote:",url_list[0][-18:-13]+"_"+url_list[0][-7:-4], " - Added:", s_votes.empty !=True, s_votes.shape)
+    if s_votes.empty != True:
+        for i in range(1, len(url_list)):
+            df = single_vote(url_list[i], worf, path)
+            new_index=list(df.iloc[:,0:5])
+            df = df.set_index(new_index)
+            if df.empty: # Votes 33 and 91 were not downloading. Using single_vote_alt for these works
+                for _ in range(3):
+                    print(_)
+                    df = single_vote_alt(url_list[i])
+                    df = df.set_index(new_index)
+            if df.empty !=True:
+                uno = s_votes.shape[1]
+                s_votes = pd.merge(s_votes, df, left_index=True, right_index=True, how='outer')
+                dos = s_votes.shape[1]
+                print("Vote:",url_list[i][-18:-13]+"_"+url_list[i][-7:-4], " - Added:", uno<dos, s_votes.shape)
+    s_votes = s_votes.reset_index(new_index)
+    
+    s_votes.insert(0, 'Year', year)
+    s_votes.insert(1, 'Congress', cong)
+    s_votes.insert(2, 'Session', sess)
+
+    return s_votes
+
+
+senat_votes(['congress_115_1_vote_036.xml'], 'f', '.')
+
+
+
+
+def congress_year_list(*year): # empty year uses current year
+    import datetime
+    current = datetime.datetime.now().year
+    if not year:
+        year = current
+    else:
+        year = year[0]
+        if len(str(year)) != 4:
+            print("Not Correct format. Returning DF for current year")
+            year = current
+        if year != current & len(str(year))==4:
+            year = year
+    congress_df = { 'year': np.arange(1989, year+1)}
+    congress_df = pd.DataFrame.from_dict(congress_df)
+    if year %2 ==0:
+        congress_df['congress']= np.repeat(np.arange(101,int(101+(((year-1989)/2)+1)),1), 2)
+    if year %2 !=0:
+        congress_df['congress']= np.repeat(np.arange(101,int(101+(((year-1989)/2)+1)),1), 2) [:-1]
+    congress_df['session'] = np.where(congress_df.year % 2, 1, 2)
+    return congress_df
+
+congres_tb = congress_year_list()
+
+get_cong_and_sess(115,1,'none')
