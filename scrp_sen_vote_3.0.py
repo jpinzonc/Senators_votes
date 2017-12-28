@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+i#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Sun Aug  6 19:13:23 2017
@@ -56,7 +56,7 @@ def site_list(congress_no, session_no): #  Enter congress and session number
 
 def single_vote (siteorfile, worf, path): #######FUNCTIONAL#####
     # RETURNS A df FOR THE VOTE SESSION. 
-    # FOUR COLUMNS MEMBER, FIRS, LAST AND VOTE 
+    # FOUR COLUMNS MEMBER, FIRST, LAST AND VOTE 
     # worf = w or f, w = url and f file
     curr_dir = (os.getcwd())
     os.chdir(path)

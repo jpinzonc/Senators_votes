@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+d#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Thu Nov 23 09:37:30 2017
@@ -94,29 +94,27 @@ def save_votes_xml2 (site_list): #DOWNLOAD AND SAVE FROM A LIST OF SITES
                 
  
 
-def update_list(congress_ol,session_ol, vote_db, vote_ol):
+def update_list(cong_ol, sess_ol, voteol, votedb):
     # Retunrs a list with the URL to be updates for the congress and vote
     # Uses site_list
-    list_votes = site_list(congress_ol,session_ol)
+    list_votes = site_list(cong_ol,sess_ol)
     list_to_update = []
-    for i in range(vote_db+1, vote_ol+1):
+    for i in range(votedb+1, voteol+1):
         list_to_update.append(itemgetter(i-1)(list_votes))
     return list_to_update
 
 # Determine current status and update:
 if congress_ol != congress_db:
     print ("The congress in the database is NOT the latest")
-    save_votes_xml2(update_list(congress_ol,session_ol, vote_db, vote_ol))
-
+    save_votes_xml2(update_list(congress_ol, session_ol, vote_ol, vote_db ))
     
 elif session_ol != session_db:
     print ("Congress up-to-date, but session is NOT")
-    save_votes_xml2(update_list(congress_ol,session_ol, vote_db, vote_ol))    
+    save_votes_xml2(update_list(congress_ol,session_ol, vote_ol, vote_db))    
 
 elif vote_ol != vote_db:
     print ("Congress and session are up-to-date, but vote is NOT")
-    save_votes_xml2(update_list(congress_ol,session_ol, vote_db, vote_ol))
-
+    save_votes_xml2(update_list(congress_ol,session_ol, vote_ol, vote_db))
 
 else:
     print("The database is up-to-date")
@@ -125,6 +123,15 @@ d = {'Index':['Congress','Session','Vote'],'Current':[congress_ol, session_ol, v
 comparison_df = pd.DataFrame(data=d).set_index('Index')
 
 print(comparison_df)   
+
+list(range(congress_db, congress_ol+1))
+
+
+
+
+
+
+
 
 def get_cong_and_sess(congress_input, session_input,year_input):
     # if year input different to 'none' the function returns the cong and session for the specified year.
@@ -237,6 +244,6 @@ def congress_year_list(*year): # empty year uses current year
     congress_df['session'] = np.where(congress_df.year % 2, 1, 2)
     return congress_df
 
-#congres_tb = congress_year_list()
+congres_tb = congress_year_list()
 
 #get_cong_and_sess(115,1,'none')
