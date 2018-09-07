@@ -1,4 +1,4 @@
-# Senators_votes
+# USA Senators votes
 ## Python Flask Solution to visualize USA Senate Votes
 
 For this project, I downloaded the USA Senate website for historical vote records -- CURRENTLY FROM 1999 to mid-2017
