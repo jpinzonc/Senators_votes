@@ -9,8 +9,9 @@ The data is then formated and used to create an SQL database.
 
 With pandas, the data from the SQL database is searched for the selected year in the app and converted into:
 
-  3 tables and
-  1 map 
+  -- 3 tables
+  
+  -- 1 map 
   
 The tables summarize the year, show the votes presented in the Senate with the results, and summarize the information for each 
 party. 
