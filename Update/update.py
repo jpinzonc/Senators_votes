@@ -1,4 +1,4 @@
-d#!/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Thu Nov 23 09:37:30 2017
@@ -23,7 +23,7 @@ from operator import itemgetter
 url = "https://www.senate.gov/legislative/votes.htm"
 response = urllib.request.urlopen(url).read()
 congress_ol = int(max(re.findall('congress=([0-9]{3})+', str(response))))
-session_ol  =int(max(re.findall('session=([0-9]{1})+', str(response))))
+session_ol  = int(max(re.findall('session=([0-9]{1})+', str(response))))
 vote_ol     = int(max(re.findall('vote=([0-9]{5})+', str(response))))
 
 #print("Current online congress %d, current session %d, and current vote %d" 
@@ -37,7 +37,18 @@ def connect_db():
 
 con = connect_db()
 
-q_a = rsq("SELECT * FROM vote_2017_115_1", con)
+q_a = rsq("SELECT * FROM vote_2017_114_1", con)
+
+
+db=sqlite3.connect('..\data\sen_vote.db')
+db.text_factory = str
+cur = db.cursor()
+
+result = cur.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
+table_names = sorted(zip(*result)[0])
+print ("\ntables are:"+newline_indent+newline_indent.join(table_names))
+
+rsq('show', con)
 
 lastVote = pd.DataFrame(q_a.columns)[pd.DataFrame(q_a.columns)[0].str.startswith("v")==True].tail(1).iloc[0]
 vote_db = int(lastVote[0][-3:])

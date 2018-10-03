@@ -1,11 +1,3 @@
-i#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Aug  6 19:13:23 2017
-
-@author: jpinzon
-"""
-
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -27,7 +19,7 @@ from pandas import read_sql_query as rsq
 
 
 #Change your path to working directory
-os.chdir("/Users/jpinzon/Google Drive/01_GitHub/senators_vote/")
+os.chdir("/Users/jpinzon/Google Drive/01_GitHub/senators_vote/data/115")
 
 ###################
 # GETING DATA FROM ANY CONGRESS AND SESSION  - JULY 2017
@@ -53,6 +45,7 @@ def site_list(congress_no, session_no): #  Enter congress and session number
         b = (init_str+str(a)+final_str)
         urls_list.append(b)
     return urls_list 
+
 
 def single_vote (siteorfile, worf, path): #######FUNCTIONAL#####
     # RETURNS A df FOR THE VOTE SESSION. 
@@ -276,7 +269,7 @@ def congress_year_list(*year): # empty year uses current year
     return congress_df
 
 congres_tb = congress_year_list()
-
+congres_tb
 #####################
 ######## INPUT DATA
 ####################
@@ -338,7 +331,7 @@ print(prim, seg)
 #####################
 ##### CREATING VOTING FILES FOR EACH SESSION. 
 #####################
-for year in range(1989,2018):
+for year in range(1989,2019):
     os.chdir("/Users/jpinzon/Google Drive/01_GitHub/senators_vote/")
     voting=pd.DataFrame()
     cong_sess=get_cong_and_sess(1,1,year)
@@ -359,10 +352,10 @@ for year in range(1989,2018):
 #####################
 ##### CREATING VOTE LIST FILES FOR EACH SESSION. 
 #####################
-for year in range(1989,2018):
+for year in range(1989,2019):
     os.chdir("/Users/jpinzon/Google Drive/01_GitHub/senators_vote/")
-    v_list=pd.DataFrame()
-    cong_sess=get_cong_and_sess(1,1,year)
+    v_list = pd.DataFrame()
+    cong_sess = get_cong_and_sess(1,1,year)
     cong = cong_sess[0]
     sess = cong_sess[1]
     path = 'data/'+str(cong)+'/'
@@ -403,7 +396,7 @@ def save_votes_xml2 (site_list): #DOWNLOAD AND SAVE FROM A LIST OF SITES
     # Each element in the list should be: 
     # "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1151/vote_115_1_00172.xml"
     # uses requests instead of urllib
-    from shutil import copyfileobj
+    #from shutil import copyfileobj
     files = [x for x in os.listdir() if x.endswith(".xml")]
     for i in range(0,len(site_list)):
         site = site_list[i]
@@ -419,7 +412,7 @@ def save_votes_xml2 (site_list): #DOWNLOAD AND SAVE FROM A LIST OF SITES
 
 # To update enter las session number and session. 
 
-save_votes_xml2(site_list(115,1))
+save_votes_xml2(site_list(115,2))
 
 ############################################################################
 
@@ -471,6 +464,7 @@ import os
 def do_directory(dirname, db, str_name):
     for filename in glob.glob(os.path.join(dirname, '*.csv')):
         do_file(filename, db, str_name)
+        print(filename)
 
 def do_file(filename, db, str_name ):
     # filename is the name of the csv in the directory
@@ -497,8 +491,13 @@ def do_file(filename, db, str_name ):
 os.chdir("/Users/jpinzon/Google Drive/01_GitHub/senators_vote/")
 # Create a db and a connection
 conn = sqlite3.connect('data/sen_vote.db')
+# SENATE APP
+conn = sqlite3.connect('map_app/files/sen_vote.db')
+
 # Apply function to add the tables from files.
-do_directory("data/voting/",conn, "vote_")
+do_directory("data/voting/", conn, "vote_")
+do_directory("data/vote_list/", conn, "vl_")
+
 # commit
 conn.commit()
 # close (this saves the db to the harddrive)
@@ -515,14 +514,17 @@ os.listdir('/Users/jpinzon/Desktop/flask/map_app/')
 congres_tb.to_sql(name='congres_tb', con=conn, if_exists='replace', index=False)
 
 # List tables in the database
-rsq("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;",conn)
+rsq("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;", conn)
 cur.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name ASC;").fetchall()
 
 # Information from the tables.
 rsq("PRAGMA table_info(congres_tb)", conn)
 
 # Print contents in a tabl
-rsq("SELECT * FROM congres_tb WHERE year =1989", conn)
+rsq("SELECT * FROM congres_tb WHERE year =2018", conn)
+
+rsq("SELECT * FROM vl_2017_115_1_vl", conn)
+
 
 # Print header of each table
 for i in range(1,len(v)):
@@ -547,7 +549,7 @@ def vote_list(year):
     table_name = str("vl_"+str(year)+"_"+str(get_cong_ses_db(year)[0])+"_"+str(get_cong_ses_db(year)[1])+"_vl")
     ls_query=("SELECT * FROM "+table_name+" ;")
     list_votes = rsq(ls_query,conn)
-    list_votes[['Vote_Numer]]
+    list_votes = list_votes[['Vote_Numer']]
     return list_votes
 
 def senator_voting(year, member):
@@ -557,7 +559,6 @@ def senator_voting(year, member):
     df_sen=df_sen.transpose()[8:]
     df_sen.columns=[str(member)]
     return df_sen
-
 
 def senator_name(year):
     tablename = str("vote_"+str(year)+"_"+str(get_cong_ses_db(year)[0])+"_"+str(get_cong_ses_db(year)[1]))
@@ -569,6 +570,7 @@ type(senator_name(2016)[1])
 
 senator_name(2016).Last[0]
 
+vote_list(2018)
 
 rsq("Select Last from vote_2006_109_2 Limit 1", conn)
 
