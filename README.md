@@ -1,18 +1,22 @@
 # USA Senators votes
 ## Python Flask Solution to visualize USA Senate Votes
 
-For this project, I downloaded the USA Senate website for historical vote records -- CURRENTLY FROM 1999 to mid-2017
+
 
 - Data and data management:
 
-The data is then formated and used to create an SQL database. 
+Data source: USA Senate website with historical vote records (1999 to mid-2017)
 
-With pandas, the data from the SQL database is searched for the selected year in the app and converted into:
+The data is formated as xml files, from the original files the information is extracted and stored in a SQL database. 
+
+Pandas is then used to extract, search and converted the data into:
 
   -- 3 tables
   
   -- 1 map 
-  
+
+These tables hold the information in memory
+
 The tables summarize the year, show the votes presented in the Senate with the results, and summarize the information for each 
 party. 
 
